@@ -16,14 +16,19 @@ def validIp(scope):
 while (1):
     #Script Header
     print(colored("""
-    -------------------------------
-        Enumeration Tool Kit
-    ------------------------------- """, 'red'))
+███████ ███    ██ ██    ██ ███    ███ ████████ ██   ██ 
+██      ████   ██ ██    ██ ████  ████    ██    ██  ██  
+█████   ██ ██  ██ ██    ██ ██ ████ ██    ██    █████   
+██      ██  ██ ██ ██    ██ ██  ██  ██    ██    ██  ██  
+███████ ██   ████  ██████  ██      ██    ██    ██   ██  
+                                                                
+                                                                """, 'red', attrs=['blink']))
 
     #Menu Display
     print(colored("[1] ", 'cyan') + "Run NMAP to conduct a ping sweep.")
     print(colored("[2] ", 'cyan') + "Run NMAP Service Scan")
-    print(colored("[3] ", 'cyan') + "Exit")
+    print(colored("[3] ", 'cyan') + "Run NMAP All Scan")
+    print(colored("[4] ", 'cyan') + "Exit")
     print("")
     print("Select from menu above: ")
 
@@ -49,8 +54,16 @@ while (1):
         scanPort = input("Enter the ports you would like scanned: ")
         os.system(f"nmap -sV -p {scanPort} {scanIP}")
         break
-
+        
+    # All Scan Conditional
     elif x == '3':
+        print("")
+        scanIP = input("Enter the IP: " )
+        scanPort = input("Enter the ports you would like scanned: ")
+        os.system(f"nmap -A -p {scanPort} {scanIP}")
+        break
+
+    elif x == '4':
         break
 
     else:
