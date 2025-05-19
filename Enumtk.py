@@ -2,7 +2,7 @@
 import os, sys, re
 from termcolor import colored, cprint
 
-def valid_ip(scope):
+def validIp(scope):
     # Input validation for IP address
     pattern = r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/[0-9]{1,2})?$'
     if not re.match(pattern, scope):
@@ -34,8 +34,8 @@ while (1):
     if x == '1':
         print("")
         ipScope = input("Enter the scope: (Example: 192.168.1.1/24)\n")
-        if valid_ip(ipScope):
-            os.system("nmap -sn " + ipScope)
+        if validIp(ipScope):
+            os.system(f"nmap -sn {ipScope}")
         else:
             print("Invalid IP address format. Please enter a valid IP address in CIDR notation.")
             continue
@@ -44,7 +44,10 @@ while (1):
 
     # Service Scan Conditional
     elif x == '2':
-        os.system("")
+        print("")
+        scanIP = input("Enter the IP: " )
+        scanPort = input("Enter the ports you would like scanned: ")
+        os.system(f"nmap -sV -p {scanPort} {scanIP}")
         break
 
     elif x == '3':
