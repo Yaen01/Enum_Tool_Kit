@@ -2,6 +2,13 @@
 import os, sys, re
 from termcolor import colored, cprint
 
+def createMenuList(menuItems):
+    i = 0
+    for x in menuItems:
+        i+=1
+        print(f"[{i}] " + x)
+    print("\nSelect from menu above: ")
+
 def validIp(scope):
     # Input validation for IP address
     pattern = r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/[0-9]{1,2})?$'
@@ -25,12 +32,7 @@ while (1):
                                                                 """, 'red', attrs=['blink']))
 
     #Menu Display
-    print(colored("[1] ", 'cyan') + "Run NMAP to conduct a ping sweep.")
-    print(colored("[2] ", 'cyan') + "Run NMAP Service Scan")
-    print(colored("[3] ", 'cyan') + "Run NMAP All Scan")
-    print(colored("[4] ", 'cyan') + "Exit")
-    print("")
-    print("Select from menu above: ")
+    createMenuList(["Nmap Ping Sweep", "Nmap Service Scan", "Nmap All Scan", "Exit"])
 
     # Menu Selection
     x = input()
@@ -49,17 +51,15 @@ while (1):
 
     # Service Scan Conditional
     elif x == '2':
-        print("")
-        scanIP = input("Enter the IP: " )
-        scanPort = input("Enter the ports you would like scanned: ")
+        scanIP = input("\nEnter the IP: " )
+        scanPort = input("\nEnter the ports you would like scanned: ")
         os.system(f"nmap -sV -p {scanPort} {scanIP}")
         break
         
     # All Scan Conditional
     elif x == '3':
-        print("")
-        scanIP = input("Enter the IP: " )
-        scanPort = input("Enter the ports you would like scanned: ")
+        scanIP = input("\nEnter the IP: " )
+        scanPort = input("\nEnter the ports you would like scanned: ")
         os.system(f"nmap -A -p {scanPort} {scanIP}")
         break
 
