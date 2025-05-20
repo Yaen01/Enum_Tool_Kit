@@ -13,11 +13,11 @@ def createMenuTitle(menuName):
 # Function for creating the Menu Item List
 def createMenuList(menuItems):
     i = 0
+    print("")
 
     for x in menuItems:
         i+=1
-        print(f"[{i}] " + x)
-    print("\nSelect from menu above: ")
+        print(colored(f"[{i}] ", 'cyan') + x)
 
 # Function for input validation for IP with CIDR notation
 def validIp(scope):
@@ -36,13 +36,12 @@ def mainMenu():
     while (1):
         #Script Header
         print(colored("""
-        ███████ ███    ██ ██    ██ ███    ███ ████████ ██   ██ 
-        ██      ████   ██ ██    ██ ████  ████    ██    ██  ██  
-        █████   ██ ██  ██ ██    ██ ██ ████ ██    ██    █████   
-        ██      ██  ██ ██ ██    ██ ██  ██  ██    ██    ██  ██  
-        ███████ ██   ████  ██████  ██      ██    ██    ██   ██  
-                                                                        
-                                                                        """, 'red', attrs=['blink']))
+███████ ███    ██ ██    ██ ███    ███ ████████ ██   ██ 
+██      ████   ██ ██    ██ ████  ████    ██    ██  ██  
+█████   ██ ██  ██ ██    ██ ██ ████ ██    ██    █████   
+██      ██  ██ ██ ██    ██ ██  ██  ██    ██    ██  ██  
+███████ ██   ████  ██████  ██      ██    ██    ██   ██  
+        """, 'red', attrs=['blink']))
 
         #Menu Title
         createMenuTitle("Main Menu")
@@ -51,7 +50,7 @@ def mainMenu():
         createMenuList(["Nmap General", "Nmap Protocol Specific", "Exit"])
 
         # Menu Selection
-        x = input()
+        x = input("\nSelect from menu above: ")
 
         # Nmap General Conditional
         if x == '1':
@@ -59,7 +58,7 @@ def mainMenu():
 
         # Nmap Protocol Specific
         elif x == '2':
-            print("")
+            print("In-Development")
 
         elif x == '3':
             break
@@ -79,14 +78,34 @@ def nmapMenu():
     while (1):
 
         # Menu Selection
-        x = input()
+        x = input("\nSelect from menu above: ")
 
-        # Ping Sweep Conditional
+        # Nmap Discovery Scan
         if x == '1':
+            saveOption = input("\nWould you like to save the results? (Y/N): ")
             ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24)\n")
+
+            #Validates IP Scope
             if validIp(ipScope):
-                os.system(f"nmap -sn {ipScope}")
-                break
+
+                #Saved Discovery Scan
+                if (saveOption.lower() == 'y'):
+                    aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
+                    os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
+                    savePath = os.system(f"pwd")
+                    print(f"{savePath}/")
+                    break
+                
+                #Unsaved Discovery Scan
+                elif (saveOption.lower()):
+                    os.system(f"nmap -sn {ipScope}")
+                    break
+
+                #Invalid Save Option Input 
+                else:
+                    print("Invalid Input.")
+                    continue
+            
             else:
                 print("\nInvalid IP address format. Please enter a valid IP address in CIDR notation.")
                 continue
