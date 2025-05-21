@@ -94,17 +94,19 @@ def nmapMenu():
 
             #Saved Discovery Scan
             if (saveOption.lower() == 'y'):
-                #aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
-                #os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
-                #savePath = os.system(f"pwd")
-                #print(f"{savePath}/")
-                print("Correct if y is chosen and IP is correct")
+                aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
+                os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
+                savePath = os.system(f"pwd")
+                print(f"{savePath}/")
+                #Print statement for testing
+                #print("Correct if y is chosen and IP is correct")
                 break
             
             #Unsaved Discovery Scan
             elif (saveOption.lower()):
-                #os.system(f"nmap -sn {ipScope}")
-                print("Correct Unsaved discovery scan")
+                os.system(f"nmap -sn {ipScope}")
+                #Print statement for testing
+                #print("Correct Unsaved discovery scan")
                 break
 
             #Invalid Save Option Input 
@@ -116,16 +118,18 @@ def nmapMenu():
         elif x == '2':
             scanIP = input("\nEnter the IP: " )
             scanPort = input("\nEnter the ports you would like scanned: ")
-            #os.system(f"nmap -sV -p {scanPort} {scanIP}")
-            print("os.system(fnmap -A -p ")
+            os.system(f"nmap -sV -p {scanPort} {scanIP}")
+            #Print statement for testing
+            #print("os.system(fnmap -A -p ")
             break
             
         # All Scan Conditional
         elif x == '3':
             scanIP = input("\nEnter the IP: " )
             scanPort = input("\nEnter the ports you would like scanned: ")
-            #os.system(f"nmap -A -p {scanPort} {scanIP}")
-            print("os.systemnmap -A -p scanPort scanIP")
+            os.system(f"nmap -A -p {scanPort} {scanIP}")
+            #Print statement for testing
+            #print("os.systemnmap -A -p scanPort scanIP")
             break
 
         elif x == '4':
