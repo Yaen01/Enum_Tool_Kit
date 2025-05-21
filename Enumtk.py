@@ -83,45 +83,49 @@ def nmapMenu():
         # Nmap Discovery Scan
         if x == '1':
             saveOption = input("\nWould you like to save the results? (Y/N): ")
-            ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24)\n")
-
-            #Validates IP Scope
-            if validIp(ipScope):
-
-                #Saved Discovery Scan
-                if (saveOption.lower() == 'y'):
-                    aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
-                    os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
-                    savePath = os.system(f"pwd")
-                    print(f"{savePath}/")
-                    break
-                
-                #Unsaved Discovery Scan
-                elif (saveOption.lower()):
-                    os.system(f"nmap -sn {ipScope}")
-                    break
-
-                #Invalid Save Option Input 
-                else:
-                    print("Invalid Input.")
-                    continue
             
-            else:
-                print("\nInvalid IP address format. Please enter a valid IP address in CIDR notation.")
-                continue
+            # Loop until a valid IP is entered
+            while True:
+                ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24)\n")
+                if validIp(ipScope):
+                    break
+                else:
+                    print("\nInvalid IP address format. Please enter a valid IP address in CIDR notation.")
 
+            #Saved Discovery Scan
+            if (saveOption.lower() == 'y'):
+                #aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
+                #os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
+                #savePath = os.system(f"pwd")
+                #print(f"{savePath}/")
+                print("Correct if y is chosen and IP is correct")
+                break
+            
+            #Unsaved Discovery Scan
+            elif (saveOption.lower()):
+                #os.system(f"nmap -sn {ipScope}")
+                print("Correct Unsaved discovery scan")
+                break
+
+            #Invalid Save Option Input 
+            else:
+                print("Invalid Input.")
+                continue
+            
         # Service Scan Conditional
         elif x == '2':
             scanIP = input("\nEnter the IP: " )
             scanPort = input("\nEnter the ports you would like scanned: ")
-            os.system(f"nmap -sV -p {scanPort} {scanIP}")
+            #os.system(f"nmap -sV -p {scanPort} {scanIP}")
+            print("os.system(fnmap -A -p ")
             break
             
         # All Scan Conditional
         elif x == '3':
             scanIP = input("\nEnter the IP: " )
             scanPort = input("\nEnter the ports you would like scanned: ")
-            os.system(f"nmap -A -p {scanPort} {scanIP}")
+            #os.system(f"nmap -A -p {scanPort} {scanIP}")
+            print("os.systemnmap -A -p scanPort scanIP")
             break
 
         elif x == '4':
