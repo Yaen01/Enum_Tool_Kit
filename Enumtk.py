@@ -6,9 +6,20 @@ from termcolor import colored, cprint
 def createMenuTitle(menuName):
     menuName = menuName.center(40, " ")
 
-    print("----------------------------------------")
-    print(menuName)
-    print("----------------------------------------")
+    #Script Header
+    os.system("clear")
+
+    print(colored("""
+███████ ███    ██ ██    ██ ███    ███ ████████ ██   ██ 
+██      ████   ██ ██    ██ ████  ████    ██    ██  ██  
+█████   ██ ██  ██ ██    ██ ██ ████ ██    ██    █████   
+██      ██  ██ ██ ██    ██ ██  ██  ██    ██    ██  ██  
+███████ ██   ████  ██████  ██      ██    ██    ██   ██  
+        """, 'light_magenta', attrs=['bold']))
+
+    print(colored("----------------------------------------", 'light_green', attrs=['bold']))
+    print(colored(menuName, 'light_green', attrs=['bold']))
+    print(colored("----------------------------------------", 'light_green', attrs=['bold']))
 
 # Function for creating the Menu Item List
 def createMenuList(menuItems):
@@ -17,7 +28,7 @@ def createMenuList(menuItems):
 
     for x in menuItems:
         i+=1
-        print(colored(f"[{i}] ", 'cyan') + x)
+        print(colored(f"[{i}] ", 'light_cyan') + x)
 
 # Function for input validation for IP with CIDR notation
 def validIp(scope):
@@ -34,15 +45,6 @@ def validIp(scope):
 # Function for the Main Menu
 def mainMenu():
     while (1):
-        #Script Header
-        print(colored("""
-███████ ███    ██ ██    ██ ███    ███ ████████ ██   ██ 
-██      ████   ██ ██    ██ ████  ████    ██    ██  ██  
-█████   ██ ██  ██ ██    ██ ██ ████ ██    ██    █████   
-██      ██  ██ ██ ██    ██ ██  ██  ██    ██    ██  ██  
-███████ ██   ████  ██████  ██      ██    ██    ██   ██  
-        """, 'red', attrs=['blink']))
-
         #Menu Title
         createMenuTitle("Main Menu")
 
@@ -64,26 +66,25 @@ def mainMenu():
             break
 
         else:
-            print("Invalid selection, please try again.")
+            input(colored("Invalid selection, please press enter.", 'red', attrs=['bold']))
             continue
 
 # Function for the Nmap General Menu
 def nmapMenu():
-    #Menu Title
-    createMenuTitle("Nmap General Menu")
-
-    #Menu Display
-    createMenuList(["Nmap Ping Sweep", "Nmap Service Scan", "Nmap All Scan", "Exit"])
-
     while (1):
+
+        #Menu Title
+        createMenuTitle("Nmap General Menu")
+
+        #Menu Display
+        createMenuList(["Nmap Ping Sweep", "Nmap Service Scan", "Nmap All Scan", "Exit"])
 
         # Menu Selection
         x = input("\nSelect from menu above: ")
 
         # Nmap Discovery Scan
         if x == '1':
-            saveOption = input("\nWould you like to save the results? (Y/N): ")
-            
+
             # Loop until a valid IP is entered
             while True:
                 ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24) ")
@@ -92,8 +93,10 @@ def nmapMenu():
                 else:
                     print("\nInvalid IP address format. Please enter a valid IP address in CIDR notation.")
 
+            saveOption = input("\nWould you like to save the results? (Y/N): ")
+
             #Saved Discovery Scan
-            if (saveOption.lower() == 'y'):
+            if (saveOption == 'y' or saveOption == 'Y'):
                 scanInterface = input("\nEnter the network interface name: (Example: eth0, wlan0) ")
 
                 #Runs Discovery Scan
@@ -105,7 +108,7 @@ def nmapMenu():
                 break
             
             #Unsaved Discovery Scan
-            elif (saveOption.lower() == 'n'):
+            elif (saveOption == 'n' or saveOption == 'N'):
                 scanInterface = input("\nEnter the network interface name: (Example: eth0, wlan0) ")
                 os.system(f"nmap -sn {ipScope} -e {scanInterface}")
                 #Print statement for testing
@@ -114,7 +117,7 @@ def nmapMenu():
 
             #Invalid Save Option Input 
             else:
-                print("Invalid Input.")
+                input(colored("Invalid Input, please press enter.", 'red', attrs=['bold']))
                 continue
             
         # Service Scan Conditional
@@ -139,7 +142,7 @@ def nmapMenu():
             break
 
         else:
-            print("Invalid selection, please try again.")
+            input(colored("Invalid selection, please press enter.", 'red', attrs=['bold']))
             continue
 
 mainMenu()
