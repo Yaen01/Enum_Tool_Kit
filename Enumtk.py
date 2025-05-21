@@ -86,7 +86,7 @@ def nmapMenu():
             
             # Loop until a valid IP is entered
             while True:
-                ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24)\n")
+                ipScope = input("\nEnter the scope: (Example: 192.168.1.1/24) ")
                 if validIp(ipScope):
                     break
                 else:
@@ -94,17 +94,20 @@ def nmapMenu():
 
             #Saved Discovery Scan
             if (saveOption.lower() == 'y'):
-                aliveHosts = os.system(f"nmap -sn {ipScope} | grep 'Nmap scan' || cut -d ' ' -f 5")
-                os.system(f"echo {aliveHosts} > ./discoveryScan.txt")
-                savePath = os.system(f"pwd")
-                print(f"{savePath}/")
+                scanInterface = input("\nEnter the network interface name: (Example: eth0, wlan0) ")
+
+                #Runs Discovery Scan
+                aliveHosts = os.system(f"nmap -sn {ipScope} -e {scanInterface} | grep 'Nmap scan' | cut -d ' ' -f 5 > ./discoveryScan.txt")
+                savePath = os.popen(f"pwd").read()
+                print(f"\n File was saved in {savePath}/.discoveryScan.txt")
                 #Print statement for testing
                 #print("Correct if y is chosen and IP is correct")
                 break
             
             #Unsaved Discovery Scan
-            elif (saveOption.lower()):
-                os.system(f"nmap -sn {ipScope}")
+            elif (saveOption.lower() == 'n'):
+                scanInterface = input("\nEnter the network interface name: (Example: eth0, wlan0) ")
+                os.system(f"nmap -sn {ipScope} -e {scanInterface}")
                 #Print statement for testing
                 #print("Correct Unsaved discovery scan")
                 break
