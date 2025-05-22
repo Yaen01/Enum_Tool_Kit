@@ -45,6 +45,7 @@ def validIp(scope):
 # Function for the Main Menu
 def mainMenu():
     while (1):
+
         #Menu Title
         createMenuTitle("Main Menu")
 
@@ -77,7 +78,7 @@ def nmapMenu():
         createMenuTitle("Nmap General Menu")
 
         #Menu Display
-        createMenuList(["Nmap Ping Sweep", "Nmap Service Scan", "Nmap All Scan", "Exit"])
+        createMenuList(["Nmap Discovery Scan (-sn)", "Nmap Syn-Stealth Scan (-sS)", "Nmap All Scan (-A)", "Go Back"])
 
         # Menu Selection
         x = input("\nSelect from menu above: ")
@@ -102,7 +103,7 @@ def nmapMenu():
                 #Runs Discovery Scan
                 aliveHosts = os.system(f"nmap -sn {ipScope} -e {scanInterface} | grep 'Nmap scan' | cut -d ' ' -f 5 > ./discoveryScan.txt")
                 savePath = os.popen(f"pwd").read()
-                print(f"\n File was saved in {savePath}/.discoveryScan.txt")
+                input(f"\nFile was saved in {savePath}/discoveryScan.txt\n\nPress Enter to Cotinue:")
                 #Print statement for testing
                 #print("Correct if y is chosen and IP is correct")
                 break
@@ -117,17 +118,47 @@ def nmapMenu():
 
             #Invalid Save Option Input 
             else:
-                input(colored("Invalid Input, please press enter.", 'red', attrs=['bold']))
+                input(colored("\nInvalid Input, please press enter.", 'red', attrs=['bold']))
                 continue
             
-        # Service Scan Conditional
+        # Syn Stealth Scan Conditional
         elif x == '2':
-            scanIP = input("\nEnter the IP: " )
-            scanPort = input("\nEnter the ports you would like scanned: ")
-            os.system(f"nmap -sV -p {scanPort} {scanIP}")
-            #Print statement for testing
-            #print("os.system(fnmap -A -p ")
-            break
+            importIP = input("\nWould you like to import an IP list? (Y/N) ")
+            
+            # Imported IP List Syn Stealth Scan
+            if (importIP == 'y' or importIP == 'Y'):
+
+                # Prompts and saves the path
+                listPath = input("\nEnter the path of your list: ")
+
+                # Saves the contents of the list
+                scanIPList = os.popen(f"cat {listPath}").read()
+
+                # Displays all the IPs that will be scanned
+                input(f"{scanIPList}\nThe above IPs will be scanned, press enter to continue: ")
+
+                # Asks for the port numbers to be scanned
+                scanPort = input("\nEnter the ports you would like scanned: ")
+                
+                # Interface Input
+                scanInterface = input("\nEnter the network interface name: (Example: eth0, wlan0) ")
+
+                # Iterates through all the IPs in the list and scans
+                with open(f"{listPath}", "r") as file:
+                    for line in file:
+                        ip = line.strip()
+                        if ip:
+                            os.system(f"sudo nmap -sS -p {scanPort} {ip} -e {scanInterface}")
+                break
+
+            # Singular IP Syn Stealth Scan
+            elif (importIP == 'n' or importIP == 'N'):
+                scanIP = input("\nEnter the IP: ")
+                scanPort = input("\nEnter the ports you would like scanned: ")
+                os.system(f"nmap -sV -p {scanPort} {scanIP}")
+                #Print statement for testing
+                #print("os.system(fnmap -A -p ")
+                break
             
         # All Scan Conditional
         elif x == '3':
