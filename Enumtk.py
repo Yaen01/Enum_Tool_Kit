@@ -203,7 +203,7 @@ class EnumShell(cmd.Cmd):
                     cmd += " | grep 'Nmap scan' | cut -d ' ' -f 5 > ./discoveryScan.txt"
                 os.system(cmd)
                 if save:
-                    print(colored("[+] Results saved to ./discoveryScan.txt", "cyan"))
+                    print(colored("Results saved to ./discoveryScan.txt", "cyan"))
 
             elif SCAN == "stealth":
                 if ip_list:
