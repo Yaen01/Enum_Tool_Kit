@@ -63,7 +63,7 @@ class EnumShell(cmd.Cmd):
             }
         elif module == "nmap_protocol":
             self.options = {
-                "RHOST": {"value": "", "required": True, "desc": "Target IP"},
+                "IP": {"value": "", "required": True, "desc": "Target IP"},
                 "PROTOCOL": {"value": "ftp", "required": True, "desc": "Protocol to scan (ftp/http/smtp)"},
             }
 
@@ -116,6 +116,7 @@ class EnumShell(cmd.Cmd):
             return
 
         key = parts[0].upper()
+
         #scan modes
         if key == "POOP" and self.module == "nmap":
             self.show_scan_selector()
@@ -126,6 +127,11 @@ class EnumShell(cmd.Cmd):
             return
 
         value = parts[1]
+        #IP Validation
+        if key in ["IP", "RHOST"] and not validIp(value):
+            print(colored(f"Invalid IP or CIDR format: {value}", "red"))
+            return
+
         if key in self.options:
             self.options[key]["value"] = value
             print(f"{key} => {value}")
