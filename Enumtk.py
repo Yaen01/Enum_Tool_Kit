@@ -58,15 +58,15 @@ class EnumShell(cmd.Cmd):
         if module == "nmap":
             self.options = {
                 "SCAN": {"value": "", "required": True, "desc": "Scan type (discovery, stealth, all)"},
-                "IP": {"value": "", "required": True, "desc": "Target IP"},
+                "RHOST": {"value": "", "required": True, "desc": "Target IP"},
                 "PORTS": {"value": "1-1000", "required": False, "desc": "Ports to scan"},
                 "INTERFACE": {"value": "eth0", "required": False, "desc": "Interface to use"},
                 "MISC": {"value": "", "required": False, "desc": "Whatever Torres wants here"},
-                "SAVE": {"value": "false", "required": False, "desc": "Save output (true/false)"},
+                "SAVE": {"value": "false", "required": False, "desc": "Save output (false/txt/xml/gnmap/nmap/all)"},
             }
         elif module == "nmap_protocol":
             self.options = {
-                "IP": {"value": "", "required": True, "desc": "Target IP"},
+                "RHOST": {"value": "", "required": True, "desc": "Target IP"},
                 "PROTOCOL": {"value": "ftp", "required": True, "desc": "Protocol to scan (ftp/http/smtp)"},
             }
 
@@ -92,20 +92,23 @@ class EnumShell(cmd.Cmd):
 
     # Shows current module options and available modules
     def do_show(self, arg):
-        "Show options or modules"
+        "Show options, modules, or command"
+        arg = arg.strip()
         if arg.strip() == "options":
             if not self.options:
-                print(colored("No module loaded.", "yellow"))
+                print(colored("No module loaded.", "red"))
                 return
             print(f"\nOptions for module: {self.module}\n")
             print(f"{'Name':<12} {'Value':<20} Description")
             print("-" * 50)
             for key, meta in self.options.items():
                 print(f"{key:<12} {meta['value']:<20} {meta['desc']}")
-        elif arg.strip() == "modules":
+        elif arg == "modules":
             print("\nModules:\n  nmap\n  nmap_protocol\n")
+        elif arg == "command":
+            self.show_command_preview()
         else:
-            print("Usage: show options | show modules")
+            print("Usage: show options | show modules | show command")
 
     # Tab completion (We can add more, just testing)
     def complete_show(self, text, line, beg, end):
@@ -129,10 +132,12 @@ class EnumShell(cmd.Cmd):
         key = parts[0].upper()
 
         #scan modes
-        #I CAN"T SET IT AS "SCAN" ONLY "POOP"
-        if key == "POOP" and self.module == "nmap":
+        if key == "SCAN" and self.module == "nmap" and len(parts) == 1:
             self.show_scan_selector()
             return
+        #save modes
+        if key == "SAVE" and self.module == "nmap":
+            self.show_save_selector()
 
         if len(parts) != 2:
             print("Usage: set OPTION VALUE")
@@ -150,7 +155,9 @@ class EnumShell(cmd.Cmd):
         else:
             print(colored(f"Invalid option: {key}", "red"))
 
-    # Secondary menu for setting scan types
+    #---------------------
+    # Scan type menu
+    #---------------------
     def show_scan_selector(self):
         scan_modes = {
             "1": ("-sU", "etc"),
@@ -183,6 +190,82 @@ class EnumShell(cmd.Cmd):
         self.options["SCAN"]["value"] = flag
         print(f" Scan mode set to {flag} ({scan_modes[parts[2]][1]})")
 
+    #---------------------
+    # Save type menu
+    #---------------------
+    def show_save_selector(self):
+        save_formats = {
+            "1": ("txt", "Plaintext"),
+            "2": ("xml", "XML format"),
+            "3": ("gnmap", "Grepable format"),
+            "4": ("nmap", "Standard nmap format"),
+            "5": ("all", "Standard -oA (xml, gnmap, nmap)"),
+            "6": ("false", "Do not save output")
+        }
+
+        print(colored("Save Formats:", "cyan", attrs=["bold"]))
+        print(f"{'ID':<4} {'Flag':<8} Description")
+        print("-" * 30)
+        for k, (fmt, desc) in save_formats.items():
+            print(f"{k:<4} {fmt:<8} {desc}")
+        print()
+
+        choice = input("Select save type: set save <number>\n" + colored("enumtk> ", "green"))
+
+        if not choice.startswith("set save"):
+            print(colored("Invalid input. Use: set save <number>", "red"))
+            return
+
+        parts = choice.strip().split()
+        if len(parts) != 3 or parts[1] != "save" or parts[2] not in save_formats:
+            print(colored("Invalid save selection.", "red"))
+            return
+
+        value = save_formats[parts[2]][0]
+        self.options["SAVE"]["value"] = value
+        print(f"{colored('>>', 'cyan')} Output save format set to: {value}")
+
+    #---------------------
+    # Show command preview
+    #---------------------
+    def show_command_preview(self):
+        "Displays the full nmap command that would run"
+        if self.module != "nmap":
+            print(colored("Nmap only rn", "yellow"))
+            return
+        
+        SCAN = self.options["SCAN"]["value"]
+        rhost = self.options["RHOST"]["value"]
+        ports = self.options["PORTS"]["value"]
+        iface = self.options["INTERFACE"]["value"]
+        misc = self.options["MISC"]["value"]
+        save_fmt = self.options["SAVE"]["value"].lower()
+        output_base = "scan_output"
+
+        output_flags = ""
+        if save_fmt == "txt":
+            output_flags = f"> {output_base}.txt"
+        elif save_fmt == "xml":
+            output_flags = f"-oX {output_base}.xml"
+        elif save_fmt == "gnmap":
+            output_flags = f"-oG {output_base}.gnmap"
+        elif save_fmt == "nmap":
+            output_flags = f"-oN {output_base}.nmap"
+        elif save_fmt == "all":
+            output_flags = f"-oA {output_base}"
+
+        misc_flags = misc if misc.lower() != "false" else ""
+
+        # Determine base scan command
+        if not SCAN.startswith("-s"):
+            print(colored("Unknown SCAN flag: {SCAN}", "red"))
+
+        final_cmd = f"nmap {SCAN} -p {ports} {misc_flags} {rhost} -e {iface} {output_flags}".strip()
+        print(colored("\n>> Command Preview:\n", "cyan") + final_cmd + "\n")
+
+
+
+
     def do_run(self, arg):
         "Run scan"
         if not self.options:
@@ -201,37 +284,35 @@ class EnumShell(cmd.Cmd):
             rhost = self.options["RHOST"]["value"]
             ports = self.options["PORTS"]["value"]
             iface = self.options["INTERFACE"]["value"]
-            ip_list = self.options["IMPORT"]["value"]
-            save = self.options["SAVE"]["value"].lower() in ["true", "yes", "y"]
+            misc_flags = self.options["MISC"]["value"]
+            misc_flags = misc_flags if misc_flags.lower() != "false" else ""
+            save_fmt = self.options["SAVE"]["value"].lower()
+            output_base = "scan_output"
 
-            if SCAN == "discovery":
-                if not validIp(rhost):
-                    print(colored("Invalid IP/CIDR.", "red"))
-                    return
-                cmd = f"nmap -sn {rhost} -e {iface}"
-                if save:
-                    cmd += " | grep 'Nmap scan' | cut -d ' ' -f 5 > ./discoveryScan.txt"
-                os.system(cmd)
-                if save:
-                    print(colored("Results saved to ./discoveryScan.txt", "cyan"))
-
-            elif SCAN == "stealth":
-                if ip_list:
-                    try:
-                        with open(ip_list) as f:
-                            for line in f:
-                                ip = line.strip()
-                                if ip:
-                                    os.system(f"nmap -sS -p {ports} {ip} -e {iface}")
-                    except Exception as e:
-                        print(colored(f"Error: {e}", "red"))
-                else:
-                    os.system(f"nmap -sS -p {ports} {rhost} -e {iface}")
-
-            elif SCAN == "all":
-                os.system(f"nmap -A -p {ports} {rhost}")
+            output_flags = ""
+            if save_fmt == "txt":
+                output_flags = f"> {output_base}.txt"
+            elif save_fmt == "xml":
+                output_flags = f" -oX {output_base}.xml"
+            elif save_fmt == "gnmap":
+                output_flags = f" -oG {output_base}.gnmap"
+            elif save_fmt == "nmap":
+                output_flags = f" -oN {output_base}.nmap"
+            elif save_fmt == "all":
+                output_flags = f" -oA {output_base}"
+            elif save_fmt in ["false", "no", "none"]:
+                output_flags = ""
             else:
-                print(colored("Unknown SCAN: use discovery/stealth/all", "red"))
+                print(colored("Invalid SAVE format. Use txt/xml/gnmap/nmap/all/false", "red"))
+
+            if not SCAN.startswith("-s"):
+                print(colored(f"Invalid SCAN value: {SCAN}", "red"))
+                return
+
+            #run final command
+            final_cmd = f"sudo nmap {SCAN} -p {ports} {misc_flags} {rhost} -e {iface} {output_flags}".strip()
+            print(colored(f"\n>> Running:\n{final_cmd}\n", "cyan"))
+            os.system(final_cmd)
 
         elif self.module == "nmap_protocol":
             rhost = self.options["RHOST"]["value"]
