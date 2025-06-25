@@ -32,7 +32,7 @@ def show_banner():
         print(colored_line)
     print(colored("------------- Enumeration Toolkit -------------", 'light_green', attrs=['bold']))
 
-# IP validation
+# IP validation with optional CIDR notation
 def validIp(scope):
     pattern = r'^([0-9]{1,3}\.){3}[0-9]{1,3}(\/[0-9]{1,2})?$'
     if not re.match(pattern, scope):
@@ -41,15 +41,18 @@ def validIp(scope):
     parts = ip.split('.')
     return all(0 <= int(part) <= 255 for part in parts) and 0 <= int(cidr) <= 32
 
-# Main shell
+#---------------------
+# Main Shell Class
+#---------------------
 class EnumShell(cmd.Cmd):
     prompt = colored("enumtk> ", "green")
 
     def __init__(self):
         super().__init__()
-        self.module = None
-        self.options = {}
+        self.module = None # Current loaded module name
+        self.options = {}  # Display current options 
 
+    # Define module-specific options
     def load_module(self, module):
         self.module = module
         if module == "nmap":
@@ -67,16 +70,18 @@ class EnumShell(cmd.Cmd):
                 "PROTOCOL": {"value": "ftp", "required": True, "desc": "Protocol to scan (ftp/http/smtp)"},
             }
 
-    # Initial menu input handler
+    # Initial menu input handler for modules
     def precmd(self, line):
         if not self.module:
             if line == "1":
                 self.load_module("nmap")
-                print(colored("Loaded nmap", "white"))
+                print(colored(">> Loaded nmap", "green"))
+                self.do_show("options")
                 return ""
             elif line == "2":
                 self.load_module("nmap_protocol")
-                print(colored("Loaded module nmap_protocol", "white"))
+                print(colored(">> Loaded module nmap_protocol", "green"))
+                self.do_show("options")
                 return ""
             elif line == "3":
                 return "exit"
@@ -85,6 +90,7 @@ class EnumShell(cmd.Cmd):
                 return ""
         return line
 
+    # Shows current module options and available modules
     def do_show(self, arg):
         "Show options or modules"
         if arg.strip() == "options":
@@ -101,9 +107,14 @@ class EnumShell(cmd.Cmd):
         else:
             print("Usage: show options | show modules")
 
+    # Tab completion (We can add more, just testing)
     def complete_show(self, text, line, beg, end):
         return [opt for opt in ['options', 'modules'] if opt.startswith(text)]
 
+    def complete_set(self, text, line, beg, end):
+        return [opt for opt in self.options if opt.startswith(text.upper())]
+
+    # SET command
     def do_set(self, arg):
         "Set an option: set OPTION VALUE or SET SCAN"
         if not self.options:
@@ -128,7 +139,7 @@ class EnumShell(cmd.Cmd):
             return
 
         value = parts[1]
-        #IP Validation
+        # IP Validation implementation
         if key in ["IP", "RHOST"] and not validIp(value):
             print(colored(f"Invalid IP or CIDR format: {value}", "red"))
             return
@@ -139,11 +150,8 @@ class EnumShell(cmd.Cmd):
         else:
             print(colored(f"Invalid option: {key}", "red"))
 
-    def complete_set(self, text, line, beg, end):
-        return [opt for opt in self.options if opt.startswith(text.upper())]
-
+    # Secondary menu for setting scan types
     def show_scan_selector(self):
-        # Add descriptions for the scan types here
         scan_modes = {
             "1": ("-sU", "etc"),
             "2": ("-sT", "etc"),
@@ -160,7 +168,7 @@ class EnumShell(cmd.Cmd):
             print(f"{k:<4} {flag:<6} {desc}")
         print()
 
-        choice = input("Select scan type: set scan <number>\n" + colored("enum> ", "green"))
+        choice = input("Select scan type: set scan <number>\n" + colored("enumtk> ", "green"))
 
         if not choice.startswith("set scan"):
             print(colored("Invalid input. Use: set scan <number>", "red"))
@@ -181,11 +189,13 @@ class EnumShell(cmd.Cmd):
             print(colored("Load a module first.", "yellow"))
             return
 
+        # Checking for missing required options
         missing = [k for k, v in self.options.items() if v["required"] and not v["value"]]
         if missing:
             print(colored(f"Missing required options: {', '.join(missing)}", "red"))
             return
 
+        # Module handler for nmap
         if self.module == "nmap":
             SCAN = self.options["SCAN"]["value"]
             rhost = self.options["RHOST"]["value"]
@@ -247,6 +257,9 @@ class EnumShell(cmd.Cmd):
     def default(self, line):
         print(colored(f"Unknown command: {line}", "red"))
 
+#---------------------
+# Entry Point
+#---------------------
 if __name__ == "__main__":
     show_banner()
     print(colored("\n[1] Nmap", "white"))
