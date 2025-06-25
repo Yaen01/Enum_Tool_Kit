@@ -81,7 +81,7 @@ class EnumShell(cmd.Cmd):
             elif line == "3":
                 return "exit"
             else:
-                print(colored("[!] Invalid selection. Type 1, 2, or 3.", "red"))
+                print(colored("Invalid selection. Type 1, 2, or 3.", "red"))
                 return ""
         return line
 
@@ -89,7 +89,7 @@ class EnumShell(cmd.Cmd):
         "Show options or modules"
         if arg.strip() == "options":
             if not self.options:
-                print(colored("[!] No module loaded.", "yellow"))
+                print(colored("No module loaded.", "yellow"))
                 return
             print(f"\nOptions for module: {self.module}\n")
             print(f"{'Name':<12} {'Value':<20} Description")
@@ -107,7 +107,7 @@ class EnumShell(cmd.Cmd):
     def do_set(self, arg):
         "Set an option: set OPTION VALUE or SET SCAN"
         if not self.options:
-            print(colored("[!] Load a module first.", "yellow"))
+            print(colored("Load a module first.", "yellow"))
             return
 
         parts = arg.strip().split(None, 1)
@@ -118,6 +118,7 @@ class EnumShell(cmd.Cmd):
         key = parts[0].upper()
 
         #scan modes
+        #I CAN"T SET IT AS "SCAN" ONLY "POOP"
         if key == "POOP" and self.module == "nmap":
             self.show_scan_selector()
             return
@@ -136,12 +137,13 @@ class EnumShell(cmd.Cmd):
             self.options[key]["value"] = value
             print(f"{key} => {value}")
         else:
-            print(colored(f"[!] Invalid option: {key}", "red"))
+            print(colored(f"Invalid option: {key}", "red"))
 
     def complete_set(self, text, line, beg, end):
         return [opt for opt in self.options if opt.startswith(text.upper())]
 
     def show_scan_selector(self):
+        # Add descriptions for the scan types here
         scan_modes = {
             "1": ("-sU", "etc"),
             "2": ("-sT", "etc"),
@@ -161,12 +163,12 @@ class EnumShell(cmd.Cmd):
         choice = input("Select scan type: set scan <number>\n" + colored("enum> ", "green"))
 
         if not choice.startswith("set scan"):
-            print(colored("[!] Invalid input. Use: set scan <number>", "red"))
+            print(colored("Invalid input. Use: set scan <number>", "red"))
             return
 
         parts = choice.strip().split()
         if len(parts) != 3 or parts[1] != "scan" or parts[2] not in scan_modes:
-            print(colored("[!] Invalid scan selection.", "red"))
+            print(colored("Invalid scan selection.", "red"))
             return
 
         flag = scan_modes[parts[2]][0]
@@ -176,12 +178,12 @@ class EnumShell(cmd.Cmd):
     def do_run(self, arg):
         "Run scan"
         if not self.options:
-            print(colored("[!] Load a module first.", "yellow"))
+            print(colored("Load a module first.", "yellow"))
             return
 
         missing = [k for k, v in self.options.items() if v["required"] and not v["value"]]
         if missing:
-            print(colored(f"[!] Missing required options: {', '.join(missing)}", "red"))
+            print(colored(f"Missing required options: {', '.join(missing)}", "red"))
             return
 
         if self.module == "nmap":
@@ -194,7 +196,7 @@ class EnumShell(cmd.Cmd):
 
             if SCAN == "discovery":
                 if not validIp(rhost):
-                    print(colored("[!] Invalid IP/CIDR.", "red"))
+                    print(colored("Invalid IP/CIDR.", "red"))
                     return
                 cmd = f"nmap -sn {rhost} -e {iface}"
                 if save:
@@ -212,14 +214,14 @@ class EnumShell(cmd.Cmd):
                                 if ip:
                                     os.system(f"nmap -sS -p {ports} {ip} -e {iface}")
                     except Exception as e:
-                        print(colored(f"[!] Error: {e}", "red"))
+                        print(colored(f"Error: {e}", "red"))
                 else:
                     os.system(f"nmap -sS -p {ports} {rhost} -e {iface}")
 
             elif SCAN == "all":
                 os.system(f"nmap -A -p {ports} {rhost}")
             else:
-                print(colored("[!] Unknown SCAN: use discovery/stealth/all", "red"))
+                print(colored("Unknown SCAN: use discovery/stealth/all", "red"))
 
         elif self.module == "nmap_protocol":
             rhost = self.options["RHOST"]["value"]
@@ -231,7 +233,7 @@ class EnumShell(cmd.Cmd):
             elif proto == "smtp":
                 os.system(f"nmap -sV -p 25 {rhost}")
             else:
-                print(colored("[!] Unsupported protocol.", "red"))
+                print(colored("Unsupported protocol.", "red"))
 
     def do_clear(self, arg):
         "Clear screen"
@@ -243,7 +245,7 @@ class EnumShell(cmd.Cmd):
         return True
 
     def default(self, line):
-        print(colored(f"[!] Unknown command: {line}", "red"))
+        print(colored(f"Unknown command: {line}", "red"))
 
 if __name__ == "__main__":
     show_banner()
